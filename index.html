@@ -659,13 +659,14 @@
         height: "1600 متر",
         map: "https://maps.google.com/?q=Rijal+Al-Alma+Haswah"
     },
-    hasan: {
+        hasan: {
         name: "مزارع بيت البن",
         location: "حسوة المعقبه / وطن الذروه",
         trees: "730",
         height: "1710 متر",
-map: "https://www.google.com/maps/search/?api=1&query=18.0,42.0"
+        map: "https://www.google.com/maps/search/?api=1&query=18.0,42.0"
     },
+
         function getAllFarms() {
             let approvedFarms = JSON.parse(localStorage.getItem('approved_user_farms') || '{}');
             return Object.assign({}, defaultFarms, approvedFarms);
