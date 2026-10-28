@@ -848,26 +848,15 @@
             loadSavedQuotes();
      
     };
-        <script>
-  // كود تشغيل وتحديث عداد الزوار تلقائياً مع كل زيارة
-  let currentVisitors = localStorage.getItem('site_visitors_count');
+        ‏<script>
+‏  let v = localStorage.getItem('site_visitors_count');
+‏  v = v ? Number(v) + 1 : 1;
+‏  localStorage.setItem('site_visitors_count', v);
 
-  if (!currentVisitors) {
-    currentVisitors = 1; // البداية من 1 إذا كانت أول مرة
-  } else {
-    currentVisitors = parseInt(currentVisitors) + 1; // زيادة 1 مع كل دخول
+‏  let elem = document.getElementById('visitorCount');
+‏  if (elem) {
+‏    elem.innerText = v;
   }
-
-  // حفظ الرقم الجديد في المتصفح
-  localStorage.setItem('site_visitors_count', currentVisitors);
-
-  // عرض الرقم في شاشة العداد
-  window.addEventListener('DOMContentLoaded', () => {
-    const visitorElem = document.getElementById('visitorCount');
-    if (visitorElem) {
-      visitorElem.innerText = Number(currentVisitors).toLocaleString('ar-SA');
-    }
-  });
-</script>
+‏</script>
 </body>
 </html>
