@@ -731,7 +731,7 @@
         }
 
         function setupVisitorCounter() {
-            let count = localStorage.getItem('site_visitors') || 1248;
+            let count = localStorage.getItem('site_visitors') || 0;
             count = parseInt(count) + 1;
             localStorage.setItem('site_visitors', count);
             document.getElementById('visitorCount').innerText = count.toLocaleString('ar-SA');
