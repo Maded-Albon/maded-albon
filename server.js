@@ -1,48 +1,61 @@
 const express = require('express');
 const path = require('path');
-const axios = require('axios'); // تأكد من وجوده في package.json
+const axios = require('axios');
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// خدمة ملفات الواجهة الأمامية من المجلد الحالي
+// خدمة ملفات الواجهة الأمامية من المجلد الرئيسي
 app.use(express.static(path.join(__dirname)));
 
-// نقطة النهاية (Endpoint) الخاصة بطلب التحقق عبر نفاذ
+// نقطة النهاية (Endpoint) لإرسال طلب تحقق حقيقي إلى نفاذ
 app.post('/api/nafath', async (req, res) => {
     try {
         const { nationalId } = req.body;
 
-        // هنا يتم ربط الطلب الحقيقي بـ API نفاذ الرسمي باستخدام بيانات الاعتماد من البيئة
-        /* 
-        const response = await axios.post('رابط_بوابة_نفاذ_الرسمي', {
-            nationalId: nationalId,
-            appId: process.env.NAFATH_APP_ID,
-            appKey: process.env.NAFATH_APP_KEY
-        });
-        */
+        if (!nationalId) {
+            return res.status(400).json({ success: false, message: "يرجى إدخال رقم الهوية/الاقامة" });
+        }
 
-        // نموذج استجابة جاهز للربط الفعلي (يمكنك تعديله حسب وثيقة ربط نفاذ الرسمية)
+        // إرسال الطلب الفعلي إلى API نفاذ الرسمي (National Information Center)
+        const nafathResponse = await axios.post(
+            process.env.NAFATH_API_URL || 'https://nafath.api.elm.sa/api/v1/mfa/request', 
+            {
+                nationalId: nationalId,
+                service: "LOGIN", // نوع الخدمة
+                action: "SPRequest"
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'APP-ID': process.env.NAFATH_APP_ID,     // يتم جلبها من إعدادات Render
+                    'APP-KEY': process.env.NAFATH_APP_KEY    // يتم جلبها من إعدادات Render
+                }
+            }
+        );
+
+        // إرجاع الاستجابة الحقيقية التي تحتوي على الرقم العشوائي المعروض للمستخدم
         res.status(200).json({
             success: true,
-            message: "تم إرسال طلب نفاذ بنجاح، يرجى قبول الطلب من تطبيق نفاذ.",
-            transId: "NF-" + Math.floor(Math.random() * 1000000),
-            random: Math.floor(Math.random() * 90 + 10) // الرقم العشوائي للتحقق
+            transId: nafathResponse.data.transId,
+            random: nafathResponse.data.random // هذا هو الرقم الذي يظهر للمستخدم ليختاره في تطبيق نفاذ
         });
 
     } catch (error) {
-        console.error("Nafath Error:", error.message);
-        res.status(500).json({ success: false, message: "فشل الاتصال بخدمة نفاذ" });
+        console.error("خطأ في الاتصال بنفاذ:", error.response?.data || error.message);
+        res.status(500).json({ 
+            success: false, 
+            message: "فشل إرسال طلب التحقق إلى نفاذ. تأكد من تفعيل المفاتيح ورقم الهوية." 
+        });
     }
 });
 
-// توجيه الصفحة الرئيسية لملف الـ HTML
+// توجيه أي مسار آخر إلى ملف الواجهة الرئيسي
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+    console.log(`Server
