@@ -439,8 +439,7 @@ footer {
             </button>
 
             <div class="notice">
-                يمكنك إضافة الأبيات دون تسجيل دخول. في هذه النسخة التجريبية
-                تُحفظ المشاركات على الجهاز الحالي فقط.
+                يمكنك إضافة الأبيات دون تسجيل دخول. في هذه النسخة تُحفظ المشاركات على السيرفر لتظهر للجميع.
             </div>
         </div>
     </section>
@@ -492,8 +491,7 @@ footer {
         </button>
 
         <div class="notice">
-            تنبيه: إرسال الطلب لا يعني اعتماد المزرعة. في هذه النسخة التجريبية
-            تُحفظ الطلبات على الجهاز الحالي فقط، ولا تصل تلقائيًا إلى مالك الموقع.
+            تنبيه: يتم إرسال الطلب وحفظه في السيرفر ليراجع من قبل مالك الموقع قبل اعتماده.
         </div>
     </section>
 
@@ -505,15 +503,6 @@ footer {
 
 <script>
 "use strict";
-
-/*
- * تنبيه:
- * هذا إصدار تجريبي يستخدم localStorage.
- * البيانات لا تنتقل بين أجهزة الزوار المختلفة.
- *
- * عند ربط قاعدة بيانات وخدمة خلفية مشتركة، استبدل عمليات
- * الحفظ المحلية بطلبات API آمنة، واجعل اعتماد المزارع من الخادم.
- */
 
 const defaultFarms = {
     yasser: {
@@ -722,58 +711,68 @@ function isSafeMapURL(value) {
     }
 }
 
-function loadSavedQuotes() {
-    const saved = readStorage("user_quotes", []);
-    const container = document.getElementById("quotesContainer");
+async function loadSavedQuotes() {
+    try {
+        const res = await fetch('/api/poems');
+        const poems = await res.json();
+        if (poems && Array.isArray(poems) && poems.length > 0) {
+            const container = document.getElementById("quotesContainer");
+            poems.forEach(quote => {
+                const card = document.createElement("div");
+                card.className = "quote-card";
 
-    saved.forEach(quote => {
-        const card = document.createElement("div");
-        card.className = "quote-card";
+                card.appendChild(makeTextElement("div", "quote-text", quote.poemText || quote.text));
+                card.appendChild(makeTextElement(
+                    "div", "quote-author", "— " + (quote.poetName || quote.author || "زائر الموقع")
+                ));
 
-        card.appendChild(makeTextElement("div", "quote-text", quote.text));
-        card.appendChild(makeTextElement(
-            "div", "quote-author", "— " + (quote.author || "زائر الموقع")
-        ));
-
-        container.appendChild(card);
-    });
+                container.appendChild(card);
+            });
+        }
+    } catch (err) {
+        console.error("خطأ في قراءة الأبيات من السيرفر:", err);
+    }
 }
 
-function addNewQuote() {
+async function addNewQuote() {
     const textInput = document.getElementById("quoteContent");
     const authorInput = document.getElementById("quoteAuthor");
-    const text = textInput.value.trim();
-    const author = authorInput.value.trim() || "زائر الموقع";
+    const poemText = textInput.value.trim();
+    const poetName = authorInput.value.trim() || "زائر الموقع";
 
-    if (!text) {
+    if (!poemText) {
         alert("اكتب الأبيات قبل الإضافة.");
         textInput.focus();
         return;
     }
 
-    const saved = readStorage("user_quotes", []);
-    saved.push({
-        text,
-        author,
-        createdAt: new Date().toISOString()
-    });
+    try {
+        const response = await fetch('/api/poems', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ poetName, poemText })
+        });
 
-    if (!writeStorage("user_quotes", saved)) return;
+        const result = await response.json();
+        if (result.success) {
+            const container = document.getElementById("quotesContainer");
+            const card = document.createElement("div");
+            card.className = "quote-card";
+            card.appendChild(makeTextElement("div", "quote-text", poemText));
+            card.appendChild(makeTextElement("div", "quote-author", "— " + poetName));
+            container.appendChild(card);
 
-    const container = document.getElementById("quotesContainer");
-    const card = document.createElement("div");
-    card.className = "quote-card";
-    card.appendChild(makeTextElement("div", "quote-text", text));
-    card.appendChild(makeTextElement("div", "quote-author", "— " + author));
-    container.appendChild(card);
-
-    textInput.value = "";
-    authorInput.value = "";
-
-    alert("تمت إضافة الأبيات على هذا الجهاز بنجاح.");
+            textInput.value = "";
+            authorInput.value = "";
+            alert("تمت إضافة الأبيات وحفظها للموقع بنجاح.");
+        }
+    } catch (err) {
+        alert("تعذر الاتصال بالسيرفر لحفظ الأبيات.");
+    }
 }
 
-function addNewFarm() {
+// دالة إرسال المزرعة الجديدة للسيرفر ليصلك الطلب
+async function addNewFarm() {
     const name = document.getElementById("farmFormName").value.trim();
     const location = document.getElementById("farmFormLoc").value.trim();
     const treesText = document.getElementById("farmFormTrees").value.trim();
@@ -803,37 +802,31 @@ function addNewFarm() {
         return;
     }
 
-    const requests = readStorage("pending_farm_requests", []);
-    requests.push({
-        id: "request_" + Date.now(),
-        name,
-        location,
-        trees: String(trees),
-        height: height + " متر",
-        map: map || "https://maps.google.com/?q=Rijal+Al-Alma",
-        status: "pending",
-        createdAt: new Date().toISOString()
-    });
+    try {
+        const response = await fetch('/api/farm-requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, location, trees, height, map })
+        });
 
-    if (!writeStorage("pending_farm_requests", requests)) return;
+        const result = await response.json();
+        if (result.success) {
+            document.getElementById("farmFormName").value = "";
+            document.getElementById("farmFormLoc").value = "";
+            document.getElementById("farmFormTrees").value = "";
+            document.getElementById("farmFormHeight").value = "";
+            document.getElementById("farmFormMap").value = "";
 
-    document.getElementById("farmFormName").value = "";
-    document.getElementById("farmFormLoc").value = "";
-    document.getElementById("farmFormTrees").value = "";
-    document.getElementById("farmFormHeight").value = "";
-    document.getElementById("farmFormMap").value = "";
-
-    alert(
-        "تم تسجيل الطلب في النسخة التجريبية على هذا الجهاز فقط. " +
-        "لن تظهر المزرعة في الخريطة قبل اعتمادها."
-    );
+            alert("تم إرسال طلب المزرعة إلى السيرفر بنجاح وسوف يتم مراجعته.");
+        } else {
+            alert("حدث خطأ أثناء إرسال الطلب: " + (result.error || ""));
+        }
+    } catch (err) {
+        alert("تعذر إرسال الطلب إلى السيرفر، يرجى المحاولة لاحقاً.");
+    }
 }
 
 function setupVisitorCounter() {
-    /*
-     * هذا عداد محلي للتجربة وليس إحصاءً حقيقيًا لزوار الموقع.
-     * العداد الحقيقي يحتاج خدمة مشتركة.
-     */
     try {
         let count = Number(localStorage.getItem("site_visitors_demo") || "0");
         count++;
