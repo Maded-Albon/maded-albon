@@ -844,11 +844,9 @@
         window.onload = function() {
             renderGeoMap();
             loadFarmData('yasser', document.querySelector('.farm-geo-card'));
-            setupVisitorCounter();
             loadSavedQuotes();
      
-    };
-        ‏<script>
+    };‏<script>
 ‏  let v = localStorage.getItem('site_visitors_count');
 ‏  v = v ? Number(v) + 1 : 1;
 ‏  localStorage.setItem('site_visitors_count', v);
