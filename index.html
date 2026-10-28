@@ -466,7 +466,7 @@
                 <div class="label">أعلى ارتفاع</div>
             </div>
             <div class="stat-item">
-<div class="number" id="visitorCount">1</div>
+                <div class="number" id="visitorCount">...</div>
                 <div class="label"><i class="fa-solid fa-eye"></i> عدد الزوار</div>
             </div>
         </div>
@@ -731,7 +731,7 @@
         }
 
         function setupVisitorCounter() {
-            let count = localStorage.getItem('site_visitors_2026') || 0;
+            let count = localStorage.getItem('site_visitors') || 1248;
             count = parseInt(count) + 1;
             localStorage.setItem('site_visitors', count);
             document.getElementById('visitorCount').innerText = count.toLocaleString('ar-SA');
@@ -844,21 +844,9 @@
         window.onload = function() {
             renderGeoMap();
             loadFarmData('yasser', document.querySelector('.farm-geo-card'));
+            setupVisitorCounter();
             loadSavedQuotes();
-     
-    };
-        ‏<script>
-  // تحديث عداد الزوار تلقائياً مع كل دخول
-  document.addEventListener("DOMContentLoaded", function() {
-    let count = localStorage.getItem('site_visitors_count');
-    count = count ? parseInt(count) + 1 : 1;
-    localStorage.setItem('site_visitors_count', count);
-    
-    let visitorElement = document.getElementById('visitorCount');
-    if (visitorElement) {
-      visitorElement.innerText = count;
-    }
-  });
-</script>
+        };
+    </script>
 </body>
 </html>
