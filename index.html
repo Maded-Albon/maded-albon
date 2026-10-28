@@ -846,15 +846,19 @@
             loadFarmData('yasser', document.querySelector('.farm-geo-card'));
             loadSavedQuotes();
      
-    };‏<script>
-‏  let v = localStorage.getItem('site_visitors_count');
-‏  v = v ? Number(v) + 1 : 1;
-‏  localStorage.setItem('site_visitors_count', v);
-
-‏  let elem = document.getElementById('visitorCount');
-‏  if (elem) {
-‏    elem.innerText = v;
-  }
-‏</script>
+    };
+        ‏<script>
+  // تحديث عداد الزوار تلقائياً مع كل دخول
+  document.addEventListener("DOMContentLoaded", function() {
+    let count = localStorage.getItem('site_visitors_count');
+    count = count ? parseInt(count) + 1 : 1;
+    localStorage.setItem('site_visitors_count', count);
+    
+    let visitorElement = document.getElementById('visitorCount');
+    if (visitorElement) {
+      visitorElement.innerText = count;
+    }
+  });
+</script>
 </body>
 </html>
