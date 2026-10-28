@@ -666,7 +666,7 @@
         height: "1710 متر",
         map: "https://www.google.com/maps/search/?api=1&query=18.0,42.0"
     },
-        },
+        }
 
         function getAllFarms() {
             let approvedFarms = JSON.parse(localStorage.getItem('approved_user_farms') || '{}');
@@ -814,7 +814,8 @@
 
         function openAdminPanel() {
             const password = prompt('الرجاء إدخال كلمة مرور مالك الموقع:');
-            if (password ='171382') { // كلمة المرور الافتراضية للمالك ويمكنك تغييرها
+            if if (password !== '171382') {
+{ // كلمة المرور الافتراضية للمالك ويمكنك تغييرها
                 if(password !== null) alert('كلمة المرور غير صحيحة!');
                 return;
             }
