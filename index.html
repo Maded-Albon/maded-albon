@@ -466,7 +466,7 @@
                 <div class="label">أعلى ارتفاع</div>
             </div>
             <div class="stat-item">
-<div class="number" id="visitorCount">0</div>
+                <div class="number" id="visitorCount">0</div>
                 <div class="label"><i class="fa-solid fa-eye"></i> عدد الزوار</div>
             </div>
         </div>
@@ -652,20 +652,21 @@
                 height: "1300 متر", 
                 map: "https://maps.app.goo.gl/9CUgpZ5iNKhvoAuQ6?g_st=ac" 
             },
-                    nokhba: {
-        name: "مزرعة نخبة البن",
-        location: "حسوة",
-        trees: "1000",
-        height: "1600 متر",
-        map: "https://maps.google.com/?q=Rijal+Al-Alma+Haswah"
-    },
-        hasan: {
-        name: "مزارع بيت البن",
-        location: "حسوة المعقبه / وطن الذروه",
-        trees: "730",
-        height: "1710 متر",
-        map: "https://www.google.com/maps/search/?api=1&query=18.0,42.0"
-    },
+            nokhba: {
+                name: "مزرعة نخبة البن",
+                location: "حسوة",
+                trees: "1000",
+                height: "1600 متر",
+                map: "https://maps.google.com/?q=Rijal+Al-Alma+Haswah"
+            },
+            hasan: {
+                name: "مزارع بيت البن",
+                location: "حسوة المعقبه / وطن الذروه",
+                trees: "730",
+                height: "1710 متر",
+                map: "https://www.google.com/maps/search/?api=1&query=18.0,42.0"
+            }
+        };
 
         function getAllFarms() {
             let approvedFarms = JSON.parse(localStorage.getItem('approved_user_farms') || '{}');
@@ -813,7 +814,7 @@
 
         function openAdminPanel() {
             const password = prompt('الرجاء إدخال كلمة مرور مالك الموقع:');
-            if (password ='171382') { // كلمة المرور الافتراضية للمالك ويمكنك تغييرها
+            if (password !== '171382') { // تم تصحيح الشرط هنا ليصبح صحيحاً
                 if(password !== null) alert('كلمة المرور غير صحيحة!');
                 return;
             }
